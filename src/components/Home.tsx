@@ -7,6 +7,7 @@ import { todayISODate } from '../lib/plans'
 import type { Routine } from '../types'
 import { AppShell } from './AppShell'
 import { Icon } from './Icon'
+import { RoutineGlyph } from './RoutineGlyph'
 
 type Props = {
   onStart: (routine: Routine) => void
@@ -150,9 +151,7 @@ export function Home({
               {custom.map((routine) => (
                 <li key={routine.id} className="list-row-wrap">
                   <button type="button" className="list-row" onClick={() => onStart(routine)}>
-                    <span className="glyph" style={{ background: routine.color }}>
-                      <Icon name="sparkle" size={22} />
-                    </span>
+                    <RoutineGlyph icon={routine.icon} color={routine.color} size={22} />
                     <span className="list-row-text">
                       <strong>{routine.title}</strong>
                       <span>
@@ -186,9 +185,7 @@ export function Home({
             {PRESETS.map((routine) => (
               <li key={routine.id} className="list-row-wrap">
                 <button type="button" className="list-row" onClick={() => onStart(routine)}>
-                  <span className="glyph" style={{ background: routine.color }}>
-                    <Icon name={routine.icon} size={22} />
-                  </span>
+                  <RoutineGlyph icon={routine.icon} color={routine.color} size={22} />
                   <span className="list-row-text">
                     <strong>{routine.title}</strong>
                     <span>{routine.description}</span>

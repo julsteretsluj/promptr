@@ -1,4 +1,3 @@
-import type { IconName } from '../components/Icon'
 import type { Routine, Step } from '../types'
 import type { ChecklistRow, Json } from './database.types'
 import { CUSTOM_STORAGE_KEY } from '../data/presets'
@@ -21,7 +20,7 @@ export function checklistToRoutine(row: ChecklistRow): Routine {
     id: row.id,
     title: row.title,
     description: row.description,
-    icon: (row.icon as IconName) || 'sparkle',
+    icon: row.icon || '✨',
     color: row.color,
     steps: parseSteps(row.steps),
     isCustom: true,

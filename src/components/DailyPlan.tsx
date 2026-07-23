@@ -16,6 +16,7 @@ import {
 import { fetchReminderSettings } from '../lib/reminders'
 import type { Routine } from '../types'
 import { Icon } from './Icon'
+import { RoutineGlyph } from './RoutineGlyph'
 
 type Props = {
   onBack: () => void
@@ -262,9 +263,7 @@ export function DailyPlan({ onBack, onStartRoutine }: Props) {
                   {customs.map((r) => (
                     <li key={r.id}>
                       <button type="button" className="list-row" onClick={() => void addRoutine(r, false)}>
-                        <span className="glyph" style={{ background: r.color }}>
-                          <Icon name="sparkle" size={22} />
-                        </span>
+                        <RoutineGlyph icon={r.icon} color={r.color} size={22} />
                         <span className="list-row-text">
                           <strong>{r.title}</strong>
                           <span>{r.steps.length} steps</span>
@@ -281,9 +280,7 @@ export function DailyPlan({ onBack, onStartRoutine }: Props) {
               {PRESETS.map((r) => (
                 <li key={r.id}>
                   <button type="button" className="list-row" onClick={() => void addRoutine(r, true)}>
-                    <span className="glyph" style={{ background: r.color }}>
-                      <Icon name={r.icon} size={22} />
-                    </span>
+                    <RoutineGlyph icon={r.icon} color={r.color} size={22} />
                     <span className="list-row-text">
                       <strong>{r.title}</strong>
                       <span>{r.description}</span>

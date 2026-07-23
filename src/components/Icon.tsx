@@ -17,6 +17,30 @@ export type IconName =
   | 'back'
   | 'sparkle'
 
+export const ICON_NAMES: IconName[] = [
+  'shower',
+  'dishes',
+  'room',
+  'teeth',
+  'makeup',
+  'dressed',
+  'homework',
+  'shopping',
+  'laundry',
+  'bed',
+  'meal',
+  'leave',
+  'sparkle',
+]
+
+export function isIconName(value: string): value is IconName {
+  return (ICON_NAMES as string[]).includes(value) ||
+    value === 'plus' ||
+    value === 'check' ||
+    value === 'chevron' ||
+    value === 'back'
+}
+
 type Props = {
   name: IconName
   size?: number

@@ -10,7 +10,8 @@ export type Routine = {
   id: string
   title: string
   description: string
-  icon: IconName
+  /** Preset SVG name or a custom emoji string */
+  icon: IconName | string
   color: string
   steps: Step[]
   isCustom?: boolean

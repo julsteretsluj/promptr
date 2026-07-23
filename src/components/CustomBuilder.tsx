@@ -2,7 +2,10 @@ import { useId, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { createChecklist, isChecklistUuid, saveGuestChecklist, updateChecklist } from '../lib/checklists'
 import type { Routine, Step } from '../types'
+import { EmojiPicker } from './EmojiPicker'
 import { Icon } from './Icon'
+import { isIconName } from './Icon'
+import { RoutineGlyph } from './RoutineGlyph'
 import { StepEditorList } from './StepEditorList'
 
 type Props = {
@@ -23,6 +26,26 @@ export function CustomBuilder({ initial = null, onCancel, onSaved }: Props) {
   const isCustomizingPreset = Boolean(initial && !isExistingCustom)
 
   const [title, setTitle] = useState(initial?.title || '')
+  const [emoji, setEmoji] = useState(() => {
+    if (!initial?.icon) return '✨'
+    if (!isIconName(String(initial.icon))) return String(initial.icon)
+    const presetEmoji: Record<string, string> = {
+      shower: '🚿',
+      dishes: '🍽️',
+      room: '🧹',
+      teeth: '🦷',
+      makeup: '💄',
+      dressed: '👕',
+      homework: '📚',
+      shopping: '🛒',
+      laundry: '🧺',
+      bed: '🛏️',
+      meal: '🍳',
+      leave: '🚪',
+      sparkle: '✨',
+    }
+    return presetEmoji[String(initial.icon)] || '✨'
+  })
   const [stepDraft, setStepDraft] = useState('')
   const [steps, setSteps] = useState<Step[]>(() =>
     (initial?.steps || []).map((s) => ({ ...s, id: isCustomizingPreset ? crypto.randomUUID() : s.id })),
@@ -58,7 +81,7 @@ export function CustomBuilder({ initial = null, onCancel, onSaved }: Props) {
       description: isCustomizingPreset
         ? 'Customized from a preset'
         : initial?.description || 'Your custom checklist',
-      icon: initial?.icon || 'sparkle',
+      icon: emoji || '✨',
       color: initial?.color || '#007AFF',
       isCustom: true,
       steps: steps.map((s) => ({
@@ -131,15 +154,20 @@ export function CustomBuilder({ initial = null, onCancel, onSaved }: Props) {
 
         <label className="field" htmlFor={titleId}>
           <span className="field-label">Checklist name</span>
-          <input
-            id={titleId}
-            className="text-input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Morning stretch"
-            autoComplete="off"
-          />
+          <div className="title-with-glyph">
+            <RoutineGlyph icon={emoji} color={initial?.color || '#007AFF'} size={26} />
+            <input
+              id={titleId}
+              className="text-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g. Morning stretch"
+              autoComplete="off"
+            />
+          </div>
         </label>
+
+        <EmojiPicker value={emoji} onChange={setEmoji} />
 
         <div className="field">
           <label className="field-label" htmlFor={stepId}>

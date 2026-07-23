@@ -286,6 +286,39 @@ button:disabled {
   color: white;
 }
 
+.glyph-emoji {
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.emoji-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 8px;
+}
+
+.emoji-swatch {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  font-size: 1.45rem;
+  line-height: 1;
+}
+
+.emoji-swatch.active {
+  outline: 3px solid var(--tint);
+  outline-offset: 1px;
+}
+
+.title-with-glyph {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
 .list-row-text,
 .custom-cta-text {
   flex: 1;
