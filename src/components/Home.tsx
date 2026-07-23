@@ -73,10 +73,16 @@ export function Home({
       <div className="page home-page">
         <header className="hero">
           <div className="hero-glow" aria-hidden />
-          <p className="hero-kicker">Gentle step-by-step prompts</p>
+          <p className="hero-kicker">The Promptr app</p>
           <h1 className="brand">Promptr</h1>
           <p className="hero-sub">
-            Break everyday tasks into clear next steps — built for brains that need a nudge.
+            Promptr is a step-by-step prompting checklist app for everyday tasks — built for
+            executive functioning support.
+          </p>
+          <p className="hero-purpose">
+            Use preset routines (shower, dishes, homework, and more) or create your own. Sign in to
+            save lasting checklists, plan your day, and get optional email or Google Calendar
+            reminders.
           </p>
         </header>
 

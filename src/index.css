@@ -184,9 +184,18 @@ button:disabled {
 .hero-sub {
   position: relative;
   margin: 14px 0 0;
-  max-width: 28ch;
+  max-width: 34ch;
   color: var(--secondary);
   font-size: var(--text-base);
+  font-weight: 400;
+}
+
+.hero-purpose {
+  position: relative;
+  margin: 12px 0 0;
+  max-width: 40ch;
+  color: var(--tertiary);
+  font-size: var(--text-sm);
   font-weight: 400;
 }
 

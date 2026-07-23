@@ -6,15 +6,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
-      content="Promptr helps you break everyday tasks into clear next steps — built for executive functioning support."
+      content="Promptr is a step-by-step prompting checklist app for everyday tasks. Built for executive functioning support, with daily plans and optional Google Sign-In."
+    />
+    <meta name="application-name" content="Promptr" />
+    <meta property="og:site_name" content="Promptr" />
+    <meta property="og:title" content="Promptr" />
+    <meta
+      property="og:description"
+      content="Promptr helps people break everyday tasks into clear next steps with checklists, daily plans, and reminders."
     />
     <meta name="theme-color" content="#e8eef5" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Promptr" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>Promptr</title>
+    <style>
+      /* Crawlable fallback if JavaScript is slow or unavailable */
+      #promptr-static {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 48px 20px;
+        font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+        color: #1c1c1e;
+        line-height: 1.5;
+      }
+      #promptr-static h1 {
+        font-size: 2.6rem;
+        letter-spacing: -0.04em;
+        margin: 0 0 12px;
+      }
+      #promptr-static p {
+        font-size: 1.2rem;
+        color: #3a3a3c;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main id="promptr-static">
+        <h1>Promptr</h1>
+        <p>
+          Promptr is a prompting checklist web app that helps people with executive functioning
+          challenges complete everyday routines. It breaks tasks such as showering, dishes, getting
+          dressed, homework, and shopping into clear one-step-at-a-time prompts.
+        </p>
+        <p>
+          With an account, Promptr lets you save lasting custom checklists, build a daily plan, and
+          receive optional reminders. You can sign in with email or Google Sign-In to sync your data.
+        </p>
+        <p>
+          <a href="/privacy.html">Privacy Policy</a>
+          ·
+          <a href="/terms.html">Terms of Service</a>
+        </p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
