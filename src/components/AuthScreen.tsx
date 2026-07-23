@@ -162,6 +162,10 @@ export function AuthScreen({ onClose, onContinueGuest }: Props) {
         )}
 
         <p className="legal-links">
+          <a href="/about.html" target="_blank" rel="noopener noreferrer">
+            About Promptr
+          </a>
+          <span aria-hidden>·</span>
           <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
             Privacy Policy
           </a>

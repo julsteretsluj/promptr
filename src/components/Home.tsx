@@ -200,6 +200,10 @@ export function Home({
         )}
 
         <footer className="legal-links home-legal">
+          <a href="/about.html" target="_blank" rel="noopener noreferrer">
+            About Promptr
+          </a>
+          <span aria-hidden>·</span>
           <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
             Privacy Policy
           </a>
