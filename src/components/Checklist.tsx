@@ -6,9 +6,11 @@ type Props = {
   routine: Routine
   onExit: () => void
   onComplete: () => void
+  onEdit?: () => void
+  editLabel?: string
 }
 
-export function Checklist({ routine, onExit, onComplete }: Props) {
+export function Checklist({ routine, onExit, onComplete, onEdit, editLabel = 'Edit' }: Props) {
   const [done, setDone] = useState<Record<string, boolean>>({})
   const currentRef = useRef<HTMLLIElement | null>(null)
 
@@ -51,7 +53,13 @@ export function Checklist({ routine, onExit, onComplete }: Props) {
           <span>Exit</span>
         </button>
         <h1 className="nav-title">{routine.title}</h1>
-        <span className="nav-spacer" />
+        {onEdit ? (
+          <button type="button" className="nav-btn nav-btn-end" onClick={onEdit}>
+            {editLabel}
+          </button>
+        ) : (
+          <span className="nav-spacer" />
+        )}
       </header>
 
       <div className="progress-block" aria-live="polite">

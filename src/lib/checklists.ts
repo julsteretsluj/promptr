@@ -107,12 +107,12 @@ export async function createChecklist(
   return saved
 }
 
-export async function updateChecklist(routine: Routine): Promise<Routine> {
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    routine.id,
-  )
+export function isChecklistUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
+}
 
-  if (isUuid) {
+export async function updateChecklist(routine: Routine): Promise<Routine> {
+  if (isChecklistUuid(routine.id)) {
     const { data, error } = await supabase
       .from('checklists')
       .update({
@@ -146,8 +146,7 @@ export async function updateChecklist(routine: Routine): Promise<Routine> {
 
 export async function archiveChecklist(id: string): Promise<void> {
   removeLocalRoutine(id)
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
-  if (!isUuid) return
+  if (!isChecklistUuid(id)) return
   const { error } = await supabase.from('checklists').update({ archived: true }).eq('id', id)
   if (error) throw error
 }

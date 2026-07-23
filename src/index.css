@@ -260,6 +260,10 @@ button:disabled {
   align-items: stretch;
 }
 
+.list-group > li.list-row-wrap:has(.edit-btn):not(:has(.delete-btn)) {
+  grid-template-columns: 1fr auto;
+}
+
 .list-row-wrap .list-row {
   border-top: none;
 }
@@ -368,6 +372,10 @@ button:disabled {
 .nav-spacer {
   justify-self: end;
   width: 64px;
+}
+
+.nav-btn-end {
+  justify-self: end;
 }
 
 /* Buttons */
@@ -811,6 +819,10 @@ button:disabled {
   display: grid;
   gap: 8px;
   margin-top: 28px;
+}
+
+.done-actions .btn-secondary {
+  width: 100%;
 }
 
 @media (max-width: 480px) {

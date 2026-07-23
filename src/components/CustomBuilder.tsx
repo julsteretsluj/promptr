@@ -1,6 +1,6 @@
 import { useId, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { createChecklist, saveGuestChecklist, updateChecklist } from '../lib/checklists'
+import { createChecklist, isChecklistUuid, saveGuestChecklist, updateChecklist } from '../lib/checklists'
 import type { Routine, Step } from '../types'
 import { Icon } from './Icon'
 import { StepEditorList } from './StepEditorList'
@@ -8,17 +8,25 @@ import { StepEditorList } from './StepEditorList'
 type Props = {
   initial?: Routine | null
   onCancel: () => void
-  onCreated: (routine: Routine) => void
+  onSaved: (routine: Routine) => void
 }
 
-export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
+export function CustomBuilder({ initial = null, onCancel, onSaved }: Props) {
   const { user } = useAuth()
   const titleId = useId()
   const stepId = useId()
-  const editing = Boolean(initial)
+
+  // Existing custom (cloud UUID or local custom-*) → update. Preset template → create copy.
+  const isExistingCustom = Boolean(
+    initial && (initial.isCustom || isChecklistUuid(initial.id) || initial.id.startsWith('custom-')),
+  )
+  const isCustomizingPreset = Boolean(initial && !isExistingCustom)
+
   const [title, setTitle] = useState(initial?.title || '')
   const [stepDraft, setStepDraft] = useState('')
-  const [steps, setSteps] = useState<Step[]>(() => initial?.steps.map((s) => ({ ...s })) || [])
+  const [steps, setSteps] = useState<Step[]>(() =>
+    (initial?.steps || []).map((s) => ({ ...s, id: isCustomizingPreset ? crypto.randomUUID() : s.id })),
+  )
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,7 +38,7 @@ export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
   }
 
   const finishWith = (routine: Routine, startNow: boolean) => {
-    if (startNow) onCreated(routine)
+    if (startNow) onSaved(routine)
     else onCancel()
   }
 
@@ -45,9 +53,11 @@ export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
     setError(null)
 
     const payload: Routine = {
-      id: initial?.id || `custom-${crypto.randomUUID()}`,
+      id: isExistingCustom && initial ? initial.id : `custom-${crypto.randomUUID()}`,
       title: trimmed,
-      description: initial?.description || 'Your custom checklist',
+      description: isCustomizingPreset
+        ? 'Customized from a preset'
+        : initial?.description || 'Your custom checklist',
       icon: initial?.icon || 'sparkle',
       color: initial?.color || '#007AFF',
       isCustom: true,
@@ -63,9 +73,11 @@ export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
 
       if (user) {
         try {
-          routine = editing
-            ? await updateChecklist(payload)
-            : await createChecklist(user.id, payload)
+          if (isExistingCustom) {
+            routine = await updateChecklist(payload)
+          } else {
+            routine = await createChecklist(user.id, payload)
+          }
         } catch (e) {
           const withLocal = e as Error & { localRoutine?: Routine }
           if (withLocal.localRoutine) {
@@ -89,6 +101,11 @@ export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
   }
 
   const canSave = title.trim().length > 0 && steps.length > 0 && !busy
+  const heading = isExistingCustom
+    ? 'Edit checklist'
+    : isCustomizingPreset
+      ? 'Customize checklist'
+      : 'New checklist'
 
   return (
     <div className="page builder-page">
@@ -97,15 +114,19 @@ export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
           <Icon name="back" size={24} />
           <span>Back</span>
         </button>
-        <h1 className="nav-title">{editing ? 'Edit checklist' : 'New checklist'}</h1>
+        <h1 className="nav-title">{heading}</h1>
         <span className="nav-spacer" />
       </header>
 
       <div className="builder-body">
         <p className="field-hint">
-          {user
-            ? 'Edit steps inline, drag to reorder, or multi-select and drag to move a group.'
-            : 'Guest mode saves on this device only. Sign in to sync across devices.'}
+          {isExistingCustom
+            ? 'Change the name or steps anytime. Drag to reorder; multi-select to move a group.'
+            : isCustomizingPreset
+              ? 'This saves as your own copy — the original preset stays unchanged.'
+              : user
+                ? 'Edit steps inline, drag to reorder, or multi-select and drag to move a group.'
+                : 'Guest mode saves on this device only. Sign in to sync across devices.'}
         </p>
 
         <label className="field" htmlFor={titleId}>
@@ -161,10 +182,10 @@ export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
 
       <footer className="sticky-actions">
         <button type="button" className="btn-primary" disabled={!canSave} onClick={() => void save(true)}>
-          {editing ? 'Save & start' : 'Save & start'}
+          Save & start
         </button>
         <button type="button" className="btn-ghost" disabled={!canSave} onClick={() => void save(false)}>
-          {editing ? 'Save changes' : 'Save for later'}
+          {isExistingCustom ? 'Save changes' : 'Save for later'}
         </button>
       </footer>
     </div>

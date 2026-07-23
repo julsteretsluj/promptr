@@ -12,6 +12,7 @@ type Props = {
   onStart: (routine: Routine) => void
   onCreateCustom: () => void
   onEditCustom: (routine: Routine) => void
+  onCustomizePreset: (routine: Routine) => void
   onAuth: () => void
   onPlan: () => void
   onProfile: () => void
@@ -22,6 +23,7 @@ export function Home({
   onStart,
   onCreateCustom,
   onEditCustom,
+  onCustomizePreset,
   onAuth,
   onPlan,
   onProfile,
@@ -182,7 +184,7 @@ export function Home({
 
           <ul className="list-group" aria-label="Preset routines">
             {PRESETS.map((routine) => (
-              <li key={routine.id}>
+              <li key={routine.id} className="list-row-wrap">
                 <button type="button" className="list-row" onClick={() => onStart(routine)}>
                   <span className="glyph" style={{ background: routine.color }}>
                     <Icon name={routine.icon} size={22} />
@@ -192,6 +194,14 @@ export function Home({
                     <span>{routine.description}</span>
                   </span>
                   <Icon name="chevron" size={22} className="row-chevron" />
+                </button>
+                <button
+                  type="button"
+                  className="edit-btn"
+                  onClick={() => onCustomizePreset(routine)}
+                  aria-label={`Customize ${routine.title}`}
+                >
+                  Edit
                 </button>
               </li>
             ))}
