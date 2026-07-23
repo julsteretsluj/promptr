@@ -18,6 +18,10 @@ export type Routine = {
 
 export type View =
   | { name: 'home' }
+  | { name: 'auth' }
   | { name: 'builder' }
-  | { name: 'checklist'; routine: Routine }
-  | { name: 'done'; routine: Routine }
+  | { name: 'plan' }
+  | { name: 'profile' }
+  | { name: 'reminders' }
+  | { name: 'checklist'; routine: Routine; returnTo?: 'home' | 'plan' }
+  | { name: 'done'; routine: Routine; returnTo?: 'home' | 'plan' }

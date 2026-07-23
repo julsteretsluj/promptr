@@ -1,0 +1,18 @@
+-- Optional: schedule send-reminders via pg_cron + pg_net (if enabled on your Supabase plan)
+-- Prefer Dashboard → Edge Functions → Schedules when available.
+
+-- Example with pg_net (uncomment and fill after enabling extensions):
+-- select cron.schedule(
+--   'promptr-send-reminders',
+--   '*/2 * * * *',
+--   $$
+--   select net.http_post(
+--     url := 'https://YOUR_PROJECT.supabase.co/functions/v1/send-reminders',
+--     headers := jsonb_build_object(
+--       'Content-Type', 'application/json',
+--       'x-cron-secret', 'YOUR_CRON_SECRET'
+--     ),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );

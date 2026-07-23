@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "send-reminders": {
+      "verify_jwt": false
+    },
+    "upsert-calendar-event": {
+      "verify_jwt": true
+    }
+  }
+}
