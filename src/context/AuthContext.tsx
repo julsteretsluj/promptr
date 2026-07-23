@@ -29,6 +29,12 @@ async function maybePersistGoogleToken(session: Session | null) {
   }
 }
 
+async function hydrateUser(session: Session) {
+  await maybePersistGoogleToken(session)
+  await migrateLocalChecklistsIfNeeded(session.user.id)
+  return fetchProfile(session.user.id)
+}
+
 type AuthContextValue = {
   configured: boolean
   loading: boolean
@@ -44,14 +50,25 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+function appOrigin(): string {
+  if (typeof window !== 'undefined') return window.location.origin
+  return import.meta.env.VITE_APP_URL || 'http://127.0.0.1:5173'
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
 
-  const loadProfile = useCallback(async (userId: string) => {
+  const applySession = useCallback(async (next: Session | null) => {
+    setSession(next)
+    if (!next?.user) {
+      setProfile(null)
+      applyProfileToDocument(null)
+      return
+    }
     try {
-      const p = await fetchProfile(userId)
+      const p = await hydrateUser(next)
       setProfile(p)
       applyProfileToDocument(p)
     } catch {
@@ -61,8 +78,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const refreshProfile = useCallback(async () => {
-    if (session?.user?.id) await loadProfile(session.user.id)
-  }, [loadProfile, session?.user?.id])
+    if (!session?.user?.id) return
+    try {
+      const p = await fetchProfile(session.user.id)
+      setProfile(p)
+      applyProfileToDocument(p)
+    } catch {
+      // keep existing profile on transient errors
+    }
+  }, [session?.user?.id])
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -73,41 +97,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     let mounted = true
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) return
-      setSession(data.session)
-      if (data.session?.user) {
-        void (async () => {
-          await maybePersistGoogleToken(data.session)
-          await migrateLocalChecklistsIfNeeded(data.session!.user.id)
-          await loadProfile(data.session!.user.id)
-          setLoading(false)
-        })()
-      } else {
-        applyProfileToDocument(null)
-        setLoading(false)
+    const init = async () => {
+      // Finish PKCE OAuth if we landed with ?code=
+      const url = new URL(window.location.href)
+      const code = url.searchParams.get('code')
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code)
+        if (!error) {
+          url.searchParams.delete('code')
+          url.searchParams.delete('state')
+          window.history.replaceState({}, document.title, url.pathname + url.search + url.hash)
+        }
       }
-    })
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
-      setSession(next)
-      if (next?.user) {
-        void (async () => {
-          await maybePersistGoogleToken(next)
-          await migrateLocalChecklistsIfNeeded(next.user.id)
-          await loadProfile(next.user.id)
-        })()
-      } else {
-        setProfile(null)
-        applyProfileToDocument(null)
-      }
+      const { data } = await supabase.auth.getSession()
+      if (!mounted) return
+      await applySession(data.session)
+      if (mounted) setLoading(false)
+    }
+
+    void init()
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, next) => {
+      // Defer Supabase calls to avoid auth deadlock
+      setTimeout(() => {
+        if (!mounted) return
+        if (event === 'SIGNED_OUT') {
+          void applySession(null)
+          return
+        }
+        void applySession(next)
+      }, 0)
     })
 
     return () => {
       mounted = false
       sub.subscription.unsubscribe()
     }
-  }, [loadProfile])
+  }, [applySession])
 
   const value = useMemo<AuthContextValue>(
     () => ({
@@ -127,18 +154,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password,
           options: {
             data: { full_name: displayName || undefined },
-            emailRedirectTo: import.meta.env.VITE_APP_URL || window.location.origin,
+            emailRedirectTo: appOrigin(),
           },
         })
         return error?.message ?? null
       },
       async signInWithGoogle() {
-        const redirectTo = `${import.meta.env.VITE_APP_URL || window.location.origin}`
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo,
-            scopes: 'https://www.googleapis.com/auth/calendar.events',
+            redirectTo: appOrigin(),
+            scopes: 'openid email profile https://www.googleapis.com/auth/calendar.events',
             queryParams: {
               access_type: 'offline',
               prompt: 'consent',

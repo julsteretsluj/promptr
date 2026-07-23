@@ -67,6 +67,20 @@ Schedule `send-reminders` every 1–5 minutes (Supabase Dashboard → Edge Funct
 
 `x-cron-secret: <CRON_SECRET>`
 
+## Auth redirect checklist (if Google sign-in does not stick)
+
+1. Supabase → **Authentication → URL Configuration**
+   - **Site URL:** `https://promptr-dusky.vercel.app`
+   - **Redirect URLs** include:
+     - `https://promptr-dusky.vercel.app/**`
+     - `http://127.0.0.1:5173/**`
+     - `http://localhost:5173/**`
+2. Vercel → Project → **Settings → Environment Variables**
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY` (anon **public** key from Supabase API settings — not a placeholder)
+   - Redeploy after changing env vars
+3. Local `.env` must use the real anon key (not `your_anon_key_here`)
+
 ## Legal pages (Google Cloud OAuth)
 
 After you deploy the site, add these URLs to Google Cloud → OAuth consent screen:

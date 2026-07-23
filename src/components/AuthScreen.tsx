@@ -76,7 +76,10 @@ export function AuthScreen({ onClose, onContinueGuest }: Props) {
 
         {!configured && (
           <p className="banner warn" role="status">
-            Auth needs a Supabase project. Copy <code>.env.example</code> to <code>.env</code> and add your keys.
+            Auth needs a real Supabase anon key. In Vercel and local <code>.env</code>, set{' '}
+            <code>VITE_SUPABASE_ANON_KEY</code> from Project Settings → API (not the placeholder).
+            Also add <code>{typeof window !== 'undefined' ? window.location.origin : 'your site URL'}</code>{' '}
+            under Supabase Authentication → URL Configuration → Redirect URLs.
           </p>
         )}
 
