@@ -19,7 +19,7 @@ export type Routine = {
 export type View =
   | { name: 'home' }
   | { name: 'auth' }
-  | { name: 'builder' }
+  | { name: 'builder'; routine?: Routine }
   | { name: 'plan' }
   | { name: 'profile' }
   | { name: 'reminders' }

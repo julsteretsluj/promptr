@@ -25,6 +25,7 @@ function AppRoutes() {
   if (view.name === 'builder') {
     return (
       <CustomBuilder
+        initial={view.routine || null}
         onCancel={() => setView({ name: 'home' })}
         onCreated={(routine) => setView({ name: 'checklist', routine, returnTo: 'home' })}
       />
@@ -85,6 +86,7 @@ function AppRoutes() {
     <Home
       onStart={(routine: Routine) => setView({ name: 'checklist', routine, returnTo: 'home' })}
       onCreateCustom={() => setView({ name: 'builder' })}
+      onEditCustom={(routine: Routine) => setView({ name: 'builder', routine })}
       onAuth={() => setView({ name: 'auth' })}
       onPlan={() => setView({ name: 'plan' })}
       onProfile={() => setView({ name: 'profile' })}

@@ -11,6 +11,7 @@ import { Icon } from './Icon'
 type Props = {
   onStart: (routine: Routine) => void
   onCreateCustom: () => void
+  onEditCustom: (routine: Routine) => void
   onAuth: () => void
   onPlan: () => void
   onProfile: () => void
@@ -20,6 +21,7 @@ type Props = {
 export function Home({
   onStart,
   onCreateCustom,
+  onEditCustom,
   onAuth,
   onPlan,
   onProfile,
@@ -156,6 +158,14 @@ export function Home({
                       </span>
                     </span>
                     <Icon name="chevron" size={22} className="row-chevron" />
+                  </button>
+                  <button
+                    type="button"
+                    className="edit-btn"
+                    onClick={() => onEditCustom(routine)}
+                    aria-label={`Edit ${routine.title}`}
+                  >
+                    Edit
                   </button>
                   <button
                     type="button"

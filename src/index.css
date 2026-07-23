@@ -256,12 +256,20 @@ button:disabled {
 
 .list-row-wrap {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   align-items: stretch;
 }
 
 .list-row-wrap .list-row {
   border-top: none;
+}
+
+.edit-btn {
+  padding: 0 14px;
+  color: var(--tint);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  border-left: 1px solid var(--separator);
 }
 
 .glyph {
@@ -471,15 +479,52 @@ button:disabled {
 
 .builder-step {
   display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 12px;
+  grid-template-columns: auto auto auto 1fr auto;
+  gap: 10px;
   align-items: center;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border-top: 1px solid var(--separator);
+  background: var(--surface);
+  touch-action: manipulation;
 }
 
 .builder-step:first-child {
   border-top: none;
+}
+
+.builder-step.is-selected {
+  background: rgba(0, 122, 255, 0.08);
+}
+
+.builder-step.is-dragging {
+  z-index: 2;
+}
+
+.step-select {
+  display: grid;
+  place-items: center;
+}
+
+.step-select input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--tint);
+}
+
+.drag-handle {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(60, 60, 67, 0.06);
+  color: var(--tertiary);
+  font-size: 0.95rem;
+  letter-spacing: -0.08em;
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .step-index {
@@ -492,6 +537,57 @@ button:disabled {
   color: var(--tint);
   font-size: 1rem;
   font-weight: 700;
+}
+
+.builder-step-fields {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.step-edit-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: rgba(60, 60, 67, 0.05);
+  outline: none;
+  font-size: var(--text-base);
+  font-weight: 500;
+}
+
+.step-edit-input.detail {
+  min-height: 40px;
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--secondary);
+}
+
+.step-edit-input:focus {
+  border-color: rgba(0, 122, 255, 0.4);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+  background: #fff;
+}
+
+.step-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.step-editor-toolbar {
+  display: grid;
+  gap: 10px;
+}
+
+.step-editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.danger-text {
+  color: var(--danger);
 }
 
 .builder-step-label {

@@ -107,8 +107,47 @@ export async function createChecklist(
   return saved
 }
 
+export async function updateChecklist(routine: Routine): Promise<Routine> {
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    routine.id,
+  )
+
+  if (isUuid) {
+    const { data, error } = await supabase
+      .from('checklists')
+      .update({
+        title: routine.title,
+        description: routine.description,
+        icon: routine.icon,
+        color: routine.color,
+        steps: routine.steps as unknown as Json,
+      })
+      .eq('id', routine.id)
+      .select()
+      .single()
+
+    if (error) {
+      saveLocalRoutine(routine)
+      const err = new Error(
+        `${error.message} Updated on this device instead. Run the grants SQL in Supabase if cloud sync fails.`,
+      )
+      ;(err as Error & { localRoutine?: Routine }).localRoutine = routine
+      throw err
+    }
+
+    const saved = checklistToRoutine(data as ChecklistRow)
+    saveLocalRoutine(saved)
+    return saved
+  }
+
+  saveLocalRoutine(routine)
+  return routine
+}
+
 export async function archiveChecklist(id: string): Promise<void> {
   removeLocalRoutine(id)
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
+  if (!isUuid) return
   const { error } = await supabase.from('checklists').update({ archived: true }).eq('id', id)
   if (error) throw error
 }

@@ -1,21 +1,24 @@
 import { useId, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { createChecklist, saveGuestChecklist } from '../lib/checklists'
+import { createChecklist, saveGuestChecklist, updateChecklist } from '../lib/checklists'
 import type { Routine, Step } from '../types'
 import { Icon } from './Icon'
+import { StepEditorList } from './StepEditorList'
 
 type Props = {
+  initial?: Routine | null
   onCancel: () => void
   onCreated: (routine: Routine) => void
 }
 
-export function CustomBuilder({ onCancel, onCreated }: Props) {
+export function CustomBuilder({ initial = null, onCancel, onCreated }: Props) {
   const { user } = useAuth()
   const titleId = useId()
   const stepId = useId()
-  const [title, setTitle] = useState('')
+  const editing = Boolean(initial)
+  const [title, setTitle] = useState(initial?.title || '')
   const [stepDraft, setStepDraft] = useState('')
-  const [steps, setSteps] = useState<Step[]>([])
+  const [steps, setSteps] = useState<Step[]>(() => initial?.steps.map((s) => ({ ...s })) || [])
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,69 +29,58 @@ export function CustomBuilder({ onCancel, onCreated }: Props) {
     setStepDraft('')
   }
 
-  const removeStep = (id: string) => {
-    setSteps((prev) => prev.filter((s) => s.id !== id))
-  }
-
-  const moveStep = (index: number, direction: -1 | 1) => {
-    setSteps((prev) => {
-      const next = [...prev]
-      const target = index + direction
-      if (target < 0 || target >= next.length) return prev
-      ;[next[index], next[target]] = [next[target], next[index]]
-      return next
-    })
+  const finishWith = (routine: Routine, startNow: boolean) => {
+    if (startNow) onCreated(routine)
+    else onCancel()
   }
 
   const save = async (startNow: boolean) => {
     const trimmed = title.trim()
     if (!trimmed || steps.length === 0) return
+    if (steps.some((s) => !s.label.trim())) {
+      setError('Every step needs text. Fill empty steps or delete them.')
+      return
+    }
     setBusy(true)
     setError(null)
+
+    const payload: Routine = {
+      id: initial?.id || `custom-${crypto.randomUUID()}`,
+      title: trimmed,
+      description: initial?.description || 'Your custom checklist',
+      icon: initial?.icon || 'sparkle',
+      color: initial?.color || '#007AFF',
+      isCustom: true,
+      steps: steps.map((s) => ({
+        ...s,
+        label: s.label.trim(),
+        detail: s.detail?.trim() || undefined,
+      })),
+    }
 
     try {
       let routine: Routine
 
       if (user) {
         try {
-          routine = await createChecklist(user.id, {
-            title: trimmed,
-            description: 'Your custom checklist',
-            icon: 'sparkle',
-            color: '#007AFF',
-            steps,
-            isCustom: true,
-          })
+          routine = editing
+            ? await updateChecklist(payload)
+            : await createChecklist(user.id, payload)
         } catch (e) {
           const withLocal = e as Error & { localRoutine?: Routine }
           if (withLocal.localRoutine) {
-            routine = withLocal.localRoutine
             setError(withLocal.message)
-            // Still allow continue after brief notice when local fallback worked
-            if (startNow) {
-              window.setTimeout(() => onCreated(routine), 900)
-            } else {
-              window.setTimeout(() => onCancel(), 1200)
-            }
+            window.setTimeout(() => finishWith(withLocal.localRoutine!, startNow), startNow ? 900 : 1200)
             return
           }
           throw e
         }
       } else {
-        routine = {
-          id: `custom-${crypto.randomUUID()}`,
-          title: trimmed,
-          description: 'Your custom checklist',
-          icon: 'sparkle',
-          color: '#007AFF',
-          isCustom: true,
-          steps,
-        }
+        routine = payload
         saveGuestChecklist(routine)
       }
 
-      if (startNow) onCreated(routine)
-      else onCancel()
+      finishWith(routine, startNow)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Could not save checklist')
     } finally {
@@ -105,14 +97,14 @@ export function CustomBuilder({ onCancel, onCreated }: Props) {
           <Icon name="back" size={24} />
           <span>Back</span>
         </button>
-        <h1 className="nav-title">New checklist</h1>
+        <h1 className="nav-title">{editing ? 'Edit checklist' : 'New checklist'}</h1>
         <span className="nav-spacer" />
       </header>
 
       <div className="builder-body">
         <p className="field-hint">
           {user
-            ? 'This checklist is saved to your account and can be reused in daily plans.'
+            ? 'Edit steps inline, drag to reorder, or multi-select and drag to move a group.'
             : 'Guest mode saves on this device only. Sign in to sync across devices.'}
         </p>
 
@@ -156,49 +148,9 @@ export function CustomBuilder({ onCancel, onCreated }: Props) {
               Add
             </button>
           </div>
-          <p className="field-hint">Keep each step small enough to do without deciding what comes next.</p>
         </div>
 
-        {steps.length > 0 && (
-          <ol className="builder-steps list-group">
-            {steps.map((step, index) => (
-              <li key={step.id} className="builder-step">
-                <span className="step-index" aria-hidden>
-                  {index + 1}
-                </span>
-                <span className="builder-step-label">{step.label}</span>
-                <div className="builder-step-actions">
-                  <button
-                    type="button"
-                    className="icon-btn"
-                    onClick={() => moveStep(index, -1)}
-                    disabled={index === 0}
-                    aria-label="Move step up"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-btn"
-                    onClick={() => moveStep(index, 1)}
-                    disabled={index === steps.length - 1}
-                    aria-label="Move step down"
-                  >
-                    ↓
-                  </button>
-                  <button
-                    type="button"
-                    className="icon-btn danger"
-                    onClick={() => removeStep(step.id)}
-                    aria-label="Remove step"
-                  >
-                    ×
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
+        {steps.length > 0 && <StepEditorList steps={steps} onChange={setSteps} />}
 
         {error && (
           <p className="banner danger" role="alert">
@@ -209,10 +161,10 @@ export function CustomBuilder({ onCancel, onCreated }: Props) {
 
       <footer className="sticky-actions">
         <button type="button" className="btn-primary" disabled={!canSave} onClick={() => void save(true)}>
-          Save & start
+          {editing ? 'Save & start' : 'Save & start'}
         </button>
         <button type="button" className="btn-ghost" disabled={!canSave} onClick={() => void save(false)}>
-          Save for later
+          {editing ? 'Save changes' : 'Save for later'}
         </button>
       </footer>
     </div>
