@@ -1,7 +1,6 @@
 import { useId, useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { CUSTOM_STORAGE_KEY } from '../data/presets'
-import { createChecklist } from '../lib/checklists'
+import { createChecklist, saveGuestChecklist } from '../lib/checklists'
 import type { Routine, Step } from '../types'
 import { Icon } from './Icon'
 
@@ -51,14 +50,30 @@ export function CustomBuilder({ onCancel, onCreated }: Props) {
       let routine: Routine
 
       if (user) {
-        routine = await createChecklist(user.id, {
-          title: trimmed,
-          description: 'Your custom checklist',
-          icon: 'sparkle',
-          color: '#007AFF',
-          steps,
-          isCustom: true,
-        })
+        try {
+          routine = await createChecklist(user.id, {
+            title: trimmed,
+            description: 'Your custom checklist',
+            icon: 'sparkle',
+            color: '#007AFF',
+            steps,
+            isCustom: true,
+          })
+        } catch (e) {
+          const withLocal = e as Error & { localRoutine?: Routine }
+          if (withLocal.localRoutine) {
+            routine = withLocal.localRoutine
+            setError(withLocal.message)
+            // Still allow continue after brief notice when local fallback worked
+            if (startNow) {
+              window.setTimeout(() => onCreated(routine), 900)
+            } else {
+              window.setTimeout(() => onCancel(), 1200)
+            }
+            return
+          }
+          throw e
+        }
       } else {
         routine = {
           id: `custom-${crypto.randomUUID()}`,
@@ -69,12 +84,7 @@ export function CustomBuilder({ onCancel, onCreated }: Props) {
           isCustom: true,
           steps,
         }
-        try {
-          const existing = JSON.parse(localStorage.getItem(CUSTOM_STORAGE_KEY) || '[]') as Routine[]
-          localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify([routine, ...existing]))
-        } catch {
-          localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify([routine]))
-        }
+        saveGuestChecklist(routine)
       }
 
       if (startNow) onCreated(routine)

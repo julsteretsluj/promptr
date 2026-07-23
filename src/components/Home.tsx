@@ -33,9 +33,13 @@ export function Home({
     if (user) {
       setLoadingCustoms(true)
       try {
-        setCustom(await fetchUserChecklists(user.id))
+        const cloud = await fetchUserChecklists(user.id)
+        const local = loadLocalCustomRoutines()
+        const byId = new Map<string, Routine>()
+        for (const r of [...local, ...cloud]) byId.set(r.id, r)
+        setCustom([...byId.values()])
       } catch {
-        setCustom([])
+        setCustom(loadLocalCustomRoutines())
       } finally {
         setLoadingCustoms(false)
       }
@@ -123,10 +127,7 @@ export function Home({
           <button
             type="button"
             className="custom-cta"
-            onClick={() => {
-              if (!user && configured) onAuth()
-              else onCreateCustom()
-            }}
+            onClick={onCreateCustom}
           >
             <span className="custom-cta-icon" aria-hidden>
               <Icon name="plus" size={26} />

@@ -175,3 +175,10 @@ create policy "google_tokens_select_own" on public.google_tokens for select usin
 create policy "google_tokens_upsert_own" on public.google_tokens for insert with check (auth.uid() = user_id);
 create policy "google_tokens_update_own" on public.google_tokens for update using (auth.uid() = user_id);
 create policy "google_tokens_delete_own" on public.google_tokens for delete using (auth.uid() = user_id);
+
+-- API roles need table privileges in addition to RLS policies
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant select on all tables in schema public to anon;
+grant all on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
