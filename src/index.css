@@ -1111,3 +1111,29 @@ fieldset.field {
 .muted-chip {
   color: var(--tertiary);
 }
+
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  margin: 8px 0 0;
+  color: var(--tertiary);
+  font-size: var(--text-sm);
+}
+
+.legal-links a {
+  color: var(--tint);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.legal-links a:hover {
+  text-decoration: underline;
+}
+
+.home-legal {
+  margin-top: 28px;
+  padding-bottom: 8px;
+}

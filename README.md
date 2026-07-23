@@ -67,6 +67,15 @@ Schedule `send-reminders` every 1–5 minutes (Supabase Dashboard → Edge Funct
 
 `x-cron-secret: <CRON_SECRET>`
 
+## Legal pages (Google Cloud OAuth)
+
+After you deploy the site, add these URLs to Google Cloud → OAuth consent screen:
+
+- Privacy Policy: `https://YOUR_DOMAIN/privacy.html`
+- Terms of Service: `https://YOUR_DOMAIN/terms.html`
+
+Locally: `http://127.0.0.1:5173/privacy.html` and `http://127.0.0.1:5173/terms.html`
+
 ## Build
 
 ```bash

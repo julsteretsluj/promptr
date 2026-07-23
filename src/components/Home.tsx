@@ -192,6 +192,16 @@ export function Home({
             </button>
           </section>
         )}
+
+        <footer className="legal-links home-legal">
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          <span aria-hidden>·</span>
+          <a href="/terms.html" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>
+        </footer>
       </div>
     </AppShell>
   )

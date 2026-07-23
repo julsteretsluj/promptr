@@ -160,6 +160,16 @@ export function AuthScreen({ onClose, onContinueGuest }: Props) {
             Continue as guest
           </button>
         )}
+
+        <p className="legal-links">
+          <a href="/privacy.html" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>
+          <span aria-hidden>·</span>
+          <a href="/terms.html" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>
+        </p>
       </div>
     </div>
   )
